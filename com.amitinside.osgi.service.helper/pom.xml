@@ -24,6 +24,7 @@
 		<osgi.core.version>4.3.0</osgi.core.version>
 		<osgi.compendium.version>5.0.0</osgi.compendium.version>
 		<osgi.util.tracker.version>1.5.1</osgi.util.tracker.version>
+		<aQute.annotation.version>3.5.0</aQute.annotation.version>
 		<guava.version>21.0</guava.version>
 		<slf4j.version>1.7.25</slf4j.version>
 	</properties>
@@ -49,12 +50,19 @@
 			<version>${osgi.util.tracker.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bnd.annotation</artifactId>
+            <version>${aQute.annotation.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
