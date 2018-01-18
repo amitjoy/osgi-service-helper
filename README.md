@@ -1,4 +1,4 @@
-# osgi-service-helper
+# OSGi Service Helper
 
 Utility class to safely use OSGi Services using low-level APIs
 
@@ -35,11 +35,11 @@ Usage 2:
  final BiConsumer<ServiceReference<MyService>, MyService> onModifiedAction = MyService::update;
 
  final ServiceCallback<MyService> callback = ServiceCallbackSupplier.create()
- 								   .onAdded(onAddedAction)
- 								   .onModified(onModifiedAction)
- 								   .onRemoved(onRemovalAction)
- 								   .get();
-
+ 								    .onAdded(onAddedAction)
+ 								    .onModified(onModifiedAction)
+ 								    .onRemoved(onRemovalAction)
+ 								    .get();
+ 
  final ServiceSupplier<MyService> serviceSupplier = trackerSupplier.shouldWait(false).withCallback(callback).get();
  final Stream<MyService> stream = serviceSupplier.get();
 
@@ -49,19 +49,19 @@ Usage 2:
 Usage 4 (Fluent API):
  
  ```java
- final ServiceSupplier{@code } serviceSupplier = ServiceSupplier.supplyWithTracker(MyService.class, null)
+ final ServiceSupplier<MyService> serviceSupplier = ServiceSupplier.supplyWithTracker(MyService.class, null)
  							    .shouldWait(true)
 							    .timeout(5)
 							    .timeunit(SECONDS)
 							    .withCallback(
 								  ServiceCallbackSupplier
-								    .{@code }create()
+								    .<MyService>create()
 								    .onAdded((r, s) -> s.doA())
 								    .onRemoved(MyService::removeA)
 								    .get())
 							    .get();
 
- final Stream{@code } stream = serviceSupplier.get();
+ final Stream<MyService> stream = serviceSupplier.get();
 
  serviceSupplier.close(); //call it when service tracking is not required at all
 ```
