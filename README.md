@@ -48,16 +48,16 @@ Usage 4 (Fluent API):
  
  ```java
  final ServiceSupplier<MyService> serviceSupplier = ServiceSupplier.supplyWithTracker(MyService.class, null)
- 							    .shouldWait(true)
-							    .timeout(5)
-							    .timeunit(SECONDS)
-							    .withCallback(
-								  ServiceCallbackSupplier
-								    .<MyService>create()
-								    .onAdded((r, s) -> s.doA())
-								    .onRemoved(MyService::removeA)
-								    .get())
-							    .get();
+ 							           .shouldWait(true)
+							           .timeout(5)
+							           .timeunit(SECONDS)
+							           .withCallback(
+								           ServiceCallbackSupplier
+								             .<MyService>create()
+								             .onAdded((r, s) -> s.doA())
+								             .onRemoved(MyService::removeA)
+								             .get())
+							           .get();
 
  final Stream<MyService> stream = serviceSupplier.get();
 
