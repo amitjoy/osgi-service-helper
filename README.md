@@ -49,8 +49,7 @@ Usage 4 (Fluent API):
  ```java
  final ServiceSupplier<MyService> serviceSupplier = ServiceSupplier.supplyWithTracker(MyService.class, null)
  							          .shouldWait(true)
-							                  .timeout(5)
-							                  .timeunit(SECONDS)
+							                  .timeout(5, SECONDS)
 							                  .withCallback(
 								             ServiceCallbackSupplier
 								               .<MyService>create()
