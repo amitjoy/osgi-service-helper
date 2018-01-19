@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * <pre>
  * final Collection<ServiceReference{@code <MyService>} refs = ServiceSupplier.references(MyService.class, filter)
- * 		.collect(Collectors.toCollection());
+ * 		                                                                      .collect(Collectors.toCollection());
  * for (final ServiceReference{@code <MyService>} ref : refs) {
  * 	try (final ServiceSupplier serviceSupplier = ServiceSupplier.supply(ref)) {
  * 		final Stream{@code <MyService>} stream = serviceSupplier.get();
@@ -81,12 +81,14 @@ import org.slf4j.LoggerFactory;
  * final BiConsumer{@code <ServiceReference<MyService>, MyService>} onModifiedAction = MyService::update;
  *
  * final ServiceCallback{@code <MyService>} callback = ServiceCallbackSupplier.<MyService>create()
- * 								   .onAdded(onAddedAction)
- * 								   .onModified(onModifiedAction)
- * 								   .onRemoved(onRemovalAction)
- * 								   .get();
+ * 								                                              .onAdded(onAddedAction)
+ * 								                                              .onModified(onModifiedAction)
+ * 								                                              .onRemoved(onRemovalAction)
+ * 								                                              .get();
  *
- * final ServiceSupplier{@code <MyService>} serviceSupplier = trackerSupplier.shouldWait(false).withCallback(callback).get();
+ * final ServiceSupplier{@code <MyService>} serviceSupplier = trackerSupplier.shouldWait(false)
+ *                                                                           .withCallback(callback)
+ *                                                                           .get();
  * final Stream{@code <MyService>} stream = serviceSupplier.get();
  *
  * serviceSupplier.close(); //call it when service tracking is not required at all
@@ -99,8 +101,7 @@ import org.slf4j.LoggerFactory;
  * {@code
  * final ServiceSupplier{@code <MyService>} serviceSupplier = ServiceSupplier.supplyWithTracker(MyService.class, null)
  * 							    .shouldWait(true)
- *							    .timeout(5)
- *							    .timeunit(SECONDS)
+ *							    .timeout(5, SECONDS)
  *							    .withCallback(
  *								  ServiceCallbackSupplier
  *								    .{@code <MyService>}create()
@@ -115,13 +116,12 @@ import org.slf4j.LoggerFactory;
  *
  * </pre>
  *
- * @param <T>
- * the target service object
+ * @param <T> the target service
  */
 public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoCloseable {
 
     /** Logger Instance */
-    private static final Logger logger = LoggerFactory.getLogger(ServiceSupplier.class);
+    private final Logger logger = LoggerFactory.getLogger(ServiceSupplier.class);
 
     /** Associated Bundle Context */
     private static final BundleContext bundleContext = getBundleContext();
@@ -277,6 +277,9 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
          *
          * @param timeout
          *            the specified amount of time
+         * @param timeUnit
+         *            the unit of the specified amount of time (can be
+         *            {@code null})
          * @return {@link TrackerSupplier} instance
          * @throws IllegalArgumentException
          *             if timeout value is negative or zero
@@ -284,32 +287,14 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
          * @see TrackerSupplier#timeunit(TimeUnit)
          * @see TrackerSupplier#get()
          */
-        public TrackerSupplier<T> timeout(final long timeout) {
+        public TrackerSupplier<T> timeout(final long timeout, final TimeUnit timeUnit) {
             if (timeout <= 1) {
                 throw new IllegalArgumentException("Timeout must be greater than 1");
             }
-            this.timeout = timeout;
-            return this;
-        }
-
-        /**
-         * If the associated {@code ServiceTracker} waits for at least one
-         * service, this method can be used to specify the unit of the time as
-         * configured. The default time unit has been set to
-         * {@link TimeUnit#MILLISECONDS}.
-         *
-         * @param timeUnit
-         *            the unit of the specified amount of time (can be
-         *            {@code null})
-         * @return {@link TrackerSupplier} instance
-         * @see TrackerSupplier#shouldWait(boolean)
-         * @see TrackerSupplier#timeout(long)
-         * @see TrackerSupplier#get()
-         */
-        public TrackerSupplier<T> timeunit(final TimeUnit timeUnit) {
             if (nonNull(timeUnit)) {
                 this.timeUnit = timeUnit;
             }
+            this.timeout = timeout;
             return this;
         }
 
@@ -674,10 +659,10 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
      * This is not a good practice though but in case of this, it is very much
      * needed because we are not sure how consumers are going to use this class.
      * If they don't close the resources, it will keep on listening to the
-     * tracked service forever. So, it is better to have trackers and consumed
+     * tracked service(s) forever. So, it is better to have trackers and consumed
      * services dereferenced while finalizing all its references. Even though it
      * is not guaranteed that the reference will be garbage collected at a
-     * certain point of time, it is an advise to use it as it is better late
+     * certain point of time, it is an advice to use it as it is better late
      * than never.
      */
     @Override
@@ -694,7 +679,7 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
      * @return {@link BundleContext} instance associated with this
      *         {@link Bundle}
      */
-    static BundleContext getBundleContext() {
+    private static BundleContext getBundleContext() {
         final Bundle bundle = FrameworkUtil.getBundle(ServiceSupplier.class);
         final BundleContext context = bundle == null ? null : bundle.getBundleContext();
         if (context == null) {
@@ -722,7 +707,8 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
      * @throws IllegalStateException
      *             If this {@link BundleContext} instance is no longer valid.
      */
-    static <T> Collection<ServiceReference<T>> getServiceReferences(final Class<T> target, final String filter) {
+    private static <T> Collection<ServiceReference<T>> getServiceReferences(final Class<T> target,
+            final String filter) {
         requireNonNull(target, "Target class instance cannot be null");
         final BundleContext context = getBundleContext();
         try {
