@@ -293,8 +293,7 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
          * If the associated {@code ServiceTracker} waits for at least one
          * service, this method can be used to specify the amount of time the
          * {@code ServiceTracker} should wait before timeout. Ideally you should
-         * also specify the {@link TimeUnit} of this timeout by invoking
-         * {@link TrackerSupplier#timeunit(TimeUnit)}. Otherwise, time unit
+         * also specify the {@link TimeUnit} of this timeout. Otherwise, time unit
          * would by default be set to {@link TimeUnit#MILLISECONDS} and the
          * default timeout is set to 1. <br/>
          * <br/>
@@ -309,7 +308,6 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
          * @throws IllegalArgumentException
          *             if timeout value is negative or zero
          * @see TrackerSupplier#shouldWait(boolean)
-         * @see TrackerSupplier#timeunit(TimeUnit)
          * @see TrackerSupplier#get()
          */
         public TrackerSupplier<T> timeout(final long timeout, final TimeUnit timeUnit) {
@@ -345,7 +343,7 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
          * {@link ServiceTracker} related configurations
          *
          * @throws NullPointerException
-         *             if {@code target} is null
+         *             if {@code target} is {@code null}
          * @throws IllegalStateException
          *             if the {@link BundleContext} instance for this bundle
          *             cannot be acquired
