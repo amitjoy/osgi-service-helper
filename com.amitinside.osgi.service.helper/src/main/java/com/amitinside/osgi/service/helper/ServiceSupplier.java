@@ -11,7 +11,7 @@ package com.amitinside.osgi.service.helper;
 
 import static java.util.Objects.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
@@ -51,17 +50,27 @@ import org.slf4j.LoggerFactory;
  * <b>Usage 1:</b>
  *
  * <pre>
+ * try (final ServiceSupplier{@code <MyService>} serviceSupplier = ServiceSupplier.supply(MyService.class)) {
+ * 	   final Stream{@code <MyService>} stream = serviceSupplier.get();
+ * }
+ * </pre>
+ *
+ *
+ * <br/>
+ * <b>Usage 2:</b>
+ *
+ * <pre>
  * try (final ServiceSupplier{@code <MyService>} serviceSupplier = ServiceSupplier.supply(MyService.class, filter)) {
  * 	   final Stream{@code <MyService>} stream = serviceSupplier.get();
  * }
  * </pre>
  *
  * <br/>
- * <b>Usage 2:</b>
+ * <b>Usage 3:</b>
  *
  * <pre>
  * final Collection<ServiceReference{@code <MyService>} refs = ServiceSupplier.references(MyService.class, filter)
- * 		                                                                      .collect(Collectors.toCollection());
+ * 		                                                                      .collect(toCollection());
  * for (final ServiceReference{@code <MyService>} ref : refs) {
  * 	try (final ServiceSupplier serviceSupplier = ServiceSupplier.supply(ref)) {
  * 		final Stream{@code <MyService>} stream = serviceSupplier.get();
@@ -71,7 +80,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * <br/>
- * <b>Usage 3:</b>
+ * <b>Usage 4:</b>
  *
  * <pre>
  * final TrackerSupplier{@code <MyService>} trackerSupplier = ServiceSupplier.supplyWithTracker(MyService.class, filter);
@@ -180,9 +189,25 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
             this.timeUnit = timeUnit;
             this.callback = callback;
         } else {
-            final Stream<ServiceReference<T>> refs = getServiceReferences(target, filter).stream();
-            serviceReferences.addAll(refs.collect(toSet()));
+            serviceReferences.addAll(getServiceReferences(target, filter).collect(toSet()));
         }
+    }
+
+    /**
+     * Supplies the instance of {@link ServiceSupplier} from which the target
+     * service instances can be retrieved
+     *
+     * @param target
+     *            the service instance to retrieve
+     * @return the {@link ServiceSupplier} instance
+     * @throws NullPointerException
+     *             if {@code target} is {@code null}
+     * @throws IllegalStateException
+     *             if the {@link BundleContext} instance for this bundle cannot
+     *             be acquired
+     */
+    public static <T> ServiceSupplier<T> supply(final Class<T> target) {
+        return new ServiceSupplier<>(target, null, false, false, 0, null, null);
     }
 
     /**
@@ -573,7 +598,7 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
             }
             final ServiceReference<T>[] refs = t.getServiceReferences();
             if (nonNull(refs)) {
-                serviceReferences.addAll(Arrays.stream(refs).collect(Collectors.toList()));
+                serviceReferences.addAll(Arrays.stream(refs).collect(toList()));
             }
         });
         try {
@@ -671,6 +696,34 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
     }
 
     /**
+     * Returns {@link ServiceReference}s to <em>all</em> services matching the
+     * target class name and OSGi filter
+     *
+     * @param target
+     *            the service class instance to retrieve
+     * @param filter
+     *            valid OSGi filter (can be {@code null})
+     * @return {@code non-null} stream of {@link ServiceReference}s to
+     *         matching services
+     * @throws NullPointerException
+     *             if {@code target} is {@code null}
+     * @throws IllegalArgumentException
+     *             if the specified {@code filter} contains an invalid filter
+     *             expression that cannot be parsed or the {@link BundleContext}
+     *             instance for this bundle cannot be acquired
+     * @throws IllegalStateException
+     *             If this {@link BundleContext} instance is no longer valid.
+     */
+    private static <T> Stream<ServiceReference<T>> getServiceReferences(final Class<T> target, final String filter) {
+        requireNonNull(target, "Target class instance cannot be null");
+        try {
+            return bundleContext.getServiceReferences(target, filter).stream();
+        } catch (final InvalidSyntaxException ise) {
+            throw new IllegalArgumentException(ise);
+        }
+    }
+
+    /**
      * Returns {@link BundleContext} instance associated with this
      * {@link Bundle}
      *
@@ -686,36 +739,6 @@ public final class ServiceSupplier<T> implements Supplier<Stream<T>>, AutoClosea
             throw new IllegalStateException("Bundle Context cannot be null");
         }
         return context;
-    }
-
-    /**
-     * Returns {@link ServiceReference}s to <em>all</em> services matching the
-     * target class name and OSGi filter
-     *
-     * @param target
-     *            the service class instance to retrieve
-     * @param filter
-     *            valid OSGi filter (can be {@code null})
-     * @return {@code non-null} collection of {@link ServiceReference}s to
-     *         matching services
-     * @throws NullPointerException
-     *             if {@code target} is {@code null}
-     * @throws IllegalArgumentException
-     *             if the specified {@code filter} contains an invalid filter
-     *             expression that cannot be parsed or the {@link BundleContext}
-     *             instance for this bundle cannot be acquired
-     * @throws IllegalStateException
-     *             If this {@link BundleContext} instance is no longer valid.
-     */
-    private static <T> Collection<ServiceReference<T>> getServiceReferences(final Class<T> target,
-            final String filter) {
-        requireNonNull(target, "Target class instance cannot be null");
-        final BundleContext context = getBundleContext();
-        try {
-            return context.getServiceReferences(target, filter);
-        } catch (final InvalidSyntaxException ise) {
-            throw new IllegalArgumentException(ise);
-        }
     }
 
 }
