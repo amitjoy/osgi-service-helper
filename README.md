@@ -5,12 +5,20 @@ This comprises an utility class to safely use OSGi Services using low-level APIs
 Usage 1:
 
 ```java
- try (final ServiceSupplier<MyService> serviceSupplier = ServiceSupplier.supply(MyService.class, filter)) {
+ try (final ServiceSupplier<MyService> serviceSupplier = ServiceSupplier.supply(MyService.class)) {
  	   final Stream<MyService> stream = serviceSupplier.get();
  }
 ```
 
 Usage 2:
+
+```java
+ try (final ServiceSupplier<MyService> serviceSupplier = ServiceSupplier.supply(MyService.class, filter)) {
+ 	   final Stream<MyService> stream = serviceSupplier.get();
+ }
+```
+
+Usage 3:
 
 ```java
  final Collection<MyService> refs = ServiceSupplier.references(MyService.class, filter)
@@ -23,7 +31,7 @@ Usage 2:
  }
 ```
 
- Usage 3:
+ Usage 4:
 
 ```java
  final TrackerSupplier<MyService> trackerSupplier = ServiceSupplier.supplyWithTracker(MyService.class, filter);
@@ -44,7 +52,7 @@ Usage 2:
  serviceSupplier.close(); //call it when service tracking is not required at all
 ```
 
-Usage 4 (Fluent API):
+Usage 5 (Fluent API):
  
  ```java
  final ServiceSupplier<MyService> serviceSupplier = ServiceSupplier.supplyWithTracker(MyService.class, null)
