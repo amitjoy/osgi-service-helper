@@ -22,7 +22,7 @@ Usage 3:
 
 ```java
  final Collection<MyService> refs = ServiceSupplier.references(MyService.class, filter)
- 		.collect(Collectors.toCollection());
+ 		.collect(toCollection());
  for (final ServiceReference<MyService> ref : refs) {
  	try (final ServiceSupplier serviceSupplier = ServiceSupplier.supply(ref)) {
  		final Stream<MyService> stream = serviceSupplier.get();
