@@ -1,6 +1,6 @@
 # OSGi Service Helper
 
-This comprises an utility class to safely use OSGi Services using low-level APIs and that is used to safely retrieve target service instances. The release of target service objects can be performed automatically if used with try-with-resources block. Otherwise close() must be invoked that releases the service objects and associated ServiceTracker. it tries to follow the best practice guidelines inherently that developers don't have to worry at all. We can also make sure that the source base would be free from resource and memory leak interferences and it could also work in concurrent programming environment safely. 
+This comprises an utility class to safely use OSGi Services using low-level APIs and that is used to safely retrieve target service instances. The release of target service objects can be performed automatically if used with try-with-resources block. Otherwise close() must be invoked that releases the service objects and associated ServiceTracker. it tries to follow the best practice guidelines inherently that developers don't have to worry at all. In addition, we can also make sure that the source base would be free from resource and memory leak interferences and it could also work in concurrent programming environment safely. 
 
 Usage 1:
 
